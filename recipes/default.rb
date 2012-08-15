@@ -43,7 +43,7 @@ when "rhel", "fedora"
 
 end
 
-remote_directory "/usr/lib/cloudkick-agent/plugins" do
+remote_directory node['cloudkick']['local_plugins_path'] do
   source "plugins"
   mode "0755"
   files_mode "0755"
@@ -51,28 +51,20 @@ remote_directory "/usr/lib/cloudkick-agent/plugins" do
   recursive true
 end
 
-template "/etc/cloudkick.conf" do
-  mode "0644"
-  source "cloudkick.conf.erb"
-  variables({
-    :node_name => node.name,
-    :cloudkick_tags => node.run_list.roles
-  })
-end
-
 package "cloudkick-agent" do
   action :install
 end
 
-service "cloudkick-agent" do
-  action [ :enable, :start ]
-  subscribes :restart, resources(:template => "/etc/cloudkick.conf")
-end
+# The configure recipe is broken out so that reconfiguration
+# is lightening fast (no package installation checks, etc).
+include_recipe "cloudkick::configure"
 
 # oauth gem for http://tickets.opscode.com/browse/COOK-797
 chef_gem "oauth"
 chef_gem "cloudkick"
 
+# This seems to require chef-server search capability,
+# but it times out harmlessly when using chef-solo.
 ruby_block "cloudkick data load" do
   block do
     require 'oauth'
