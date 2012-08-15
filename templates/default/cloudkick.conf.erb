@@ -1,4 +1,5 @@
-oauth_key <%= node['cloudkick']['oauth_key'] %>
-oauth_secret <%= node['cloudkick']['oauth_secret'] %>
+oauth_key <%= @oauth_key %>
+oauth_secret <%= @oauth_secret %>
 tags <%= @cloudkick_tags.join(",") %>
 name <%= @node_name %>
+local_plugins_path <%= @local_plugins_path %>
