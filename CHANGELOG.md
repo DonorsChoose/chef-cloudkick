@@ -1,3 +1,7 @@
+## v1.2.2:
+
+* [COOK-1728] - Cloudkick agent requires openssl 0.9.8 on precise
+
 ## v1.2.0:
 
 * [COOK-797] - Cloudkick Cookbook should Provide Chef Resources
