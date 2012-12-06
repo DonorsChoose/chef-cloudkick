@@ -40,15 +40,50 @@ when "debian"
 
 when "rhel", "fedora"
 
-  yum_repository "cloudkick" do
-    url "http://packages.cloudkick.com/redhat/$basearch"
-    action :add
-  end
+  # Don't use the cloudkick yum repository on CentOS 6, because there
+  # will be a missing libcurl.so.3 dependency (was that CentOS 5 only?).
+  unless (node['platform'] == 'centos' && node['platform_version'].to_f >= 6.0)
 
-  if (node['platform'] == 'centos' && node['platform_version'].to_f >= 6.0)
-    rpm_package "" do
-      source "http://packages.cloudkick.com/releases/cloudkick-config/binaries/cloudkick-config-centos6-1.2.1-0.x86_64.rpm"
+    yum_repository "cloudkick" do
+      url "http://packages.cloudkick.com/redhat/$basearch"
+      action :add
     end
+
+  else
+
+    # https://support.cloudkick.com/Installing_Cloudkick_on_AMI,_CentOS,_and_Red_Hat
+    # For CentOS 6, we must download and install beta binaries "by hand"
+    # for cloudkick-config-1.2.1-0 and cloudkick-agent-0.9.21-0 packages.
+    config_ver = "1.2.1-0"
+    agent_ver = "0.9.21-0"
+    arch = node['kernel']['machine']
+
+    remote_file "#{Chef::Config[:file_cache_path]}/cloudkick-config-centos6-#{config_ver}.#{arch}.rpm" do
+      not_if "rpm -qa | egrep -qx 'cloudkick-config-#{config_ver}.*'"
+      source "http://packages.cloudkick.com/releases/cloudkick-config/binaries/cloudkick-config-centos6-#{config_ver}.#{arch}.rpm"
+      notifies :install, "rpm_package[cloudkick-config]", :immediately
+      retries 5 # We may be redirected to a FTP URL, CHEF-1031.
+    end
+
+    rpm_package "cloudkick-config" do
+      not_if "rpm -qa | egrep -qx 'cloudkick-config-#{config_ver}.*'"
+      source "#{Chef::Config[:file_cache_path]}/cloudkick-config-centos6-#{config_ver}.#{arch}.rpm"
+      action :install
+    end
+
+    remote_file "#{Chef::Config[:file_cache_path]}/cloudkick-agent-centos6-#{agent_ver}.#{arch}.rpm" do
+      not_if "rpm -qa | egrep -qx 'cloudkick-agent-#{agent_ver}.*'"
+      source "http://packages.cloudkick.com/releases/cloudkick-agent/binaries/cloudkick-agent-centos6-#{agent_ver}.#{arch}.rpm"
+      notifies :install, "rpm_package[cloudkick-agent]", :immediately
+      retries 5 # We may be redirected to a FTP URL, CHEF-1031.
+    end
+
+    rpm_package "cloudkick-agent" do
+      not_if "rpm -qa | egrep -qx 'cloudkick-agent-#{agent_ver}.*'"
+      source "#{Chef::Config[:file_cache_path]}/cloudkick-agent-centos6-#{agent_ver}.#{arch}.rpm"
+      action :install
+    end
+
   end
 
 end
@@ -61,8 +96,12 @@ remote_directory node['cloudkick']['local_plugins_path'] do
   recursive true
 end
 
-package "cloudkick-agent" do
-  action :install
+# On CentOS 6, we used rpm_package for cloudkick installation instead of
+# using an apt_repository or yum_repository.
+unless (node['platform'] == 'centos' && node['platform_version'].to_f >= 6.0)
+  package "cloudkick-agent" do
+    action :install
+  end
 end
 
 # The configure recipe is broken out so that reconfiguration
