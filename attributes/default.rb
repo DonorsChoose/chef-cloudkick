@@ -20,7 +20,7 @@
 default['cloudkick']['oauth_key'] = 'YOUR KEY HERE'
 default['cloudkick']['oauth_secret'] = 'YOUR SECRET HERE'
 default['cloudkick']['additional_tags'] = [ 'agent' ]
-default['cloudkick']['node_name'] = node.name
+default['cloudkick']['node_name'] = node[:hostname]
 default['cloudkick']['local_plugins_path'] = '/usr/lib/cloudkick-agent/plugins'
 
 
