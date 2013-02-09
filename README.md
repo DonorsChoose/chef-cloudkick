@@ -33,12 +33,20 @@ agent can be downloaded and installed.
 Attributes
 ==========
 
+The `/etc/cloudkick.conf` is built using these attribute values:
+
 * `node['cloudkick']['oauth_key']` - the OAuth key used for
-authentication with the Cloudkick API.
+  authentication with the Cloudkick API.
 * `node['cloudkick']['oauth_secret']` - the OAuth secret used for
   authentication with the Cloudkick API.
+* `node['cloudkick']['node_name']` - host name for the Cloudkick dashboard,
+  taken from ohai `node[:hostname]` by default.
+* `node['cloudkick']['additional_tags']` - additional Cloudkick tags,
+  added to the tags taken automatically from Role names.
+* `node['cloudkick']['local_plugins_path']` - path to a directory containing custom agent plugins,
+  defaults to `/usr/lib/cloudkick-agent/plugins`, the same as Cloudkick.
 * `node['cloudkick']['data']` - data for the Cloudkick API about the
-  node
+  node.
 
 Resources & Providers
 =====================
@@ -82,7 +90,10 @@ Assuming you name the role 'cloudkick', here is the required json:
       "chef_type": "role",
       "json_class": "Chef::Role",
       "default_attributes": {
-
+        "cloudkick": {
+          "additional_tags": [ "agent" ],      # Optional.
+          "node_name": "YOUR UNIQUE HOSTNAME"  # Optional.
+        }
       },
       "description": "Configures Cloudkick",
       "run_list": [

@@ -19,7 +19,12 @@
 # Set these in a role, see __Usage__ in README.md
 default['cloudkick']['oauth_key'] = 'YOUR KEY HERE'
 default['cloudkick']['oauth_secret'] = 'YOUR SECRET HERE'
+default['cloudkick']['additional_tags'] = [ 'agent' ]
+default['cloudkick']['node_name'] = node[:hostname]
+default['cloudkick']['local_plugins_path'] = '/usr/lib/cloudkick-agent/plugins'
+
 
 # This is set via the default recipe, or can be set in a role (see
 # README.md)
 default['cloudkick']['data'] = nil
+
