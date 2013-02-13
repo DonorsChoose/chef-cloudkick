@@ -1,3 +1,8 @@
+## v1.3.0:
+
+* [COOK-2023] - Add chef-cloudkick support for CentOS 6.3 and a
+  separate recipes/configure.rb for speedy reconfigurations
+
 ## v1.2.2:
 
 * [COOK-1728] - Cloudkick agent requires openssl 0.9.8 on precise
