@@ -119,6 +119,8 @@ ruby_block "cloudkick data load" do
     require 'oauth'
     require 'cloudkick'
     begin
+      # This throws a "undefined method `map' for false:FalseClass"
+      # exception, but doesn't seem to harm the run.
       node.set['cloudkick']['data'] = Chef::CloudkickData.get(node)
     rescue Exception => e
       Chef::Log.warn("Unable to retrieve Cloudkick data for #{node.name}\n#{e}")
