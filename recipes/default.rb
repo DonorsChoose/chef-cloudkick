@@ -58,9 +58,13 @@ when "rhel", "fedora"
     agent_ver = "0.9.21-0"
     arch = node['kernel']['machine']
 
+    # Grab from data1!!!!
+    # scp root@10.4.49.66:/var/chef-solo/cloudkick-config-centos6-1.2.1-0.x86_64.rpm /var/chef-solo
     remote_file "#{Chef::Config[:file_cache_path]}/cloudkick-config-centos6-#{config_ver}.#{arch}.rpm" do
       not_if "rpm -qa | egrep -qx 'cloudkick-config-#{config_ver}.*'"
       source "http://packages.cloudkick.com/releases/cloudkick-config/binaries/cloudkick-config-centos6-#{config_ver}.#{arch}.rpm"
+      # sha256sum /var/chef-solo/cloudkick-config-centos6-1.2.1-0.x86_64.rpm 
+      checksum "f9ab90a0329db6355d7f466adb745fdbfa9de0ef241209601023f0b0c8533921"
       notifies :install, "rpm_package[cloudkick-config]", :immediately
       retries 5 # We may be redirected to a FTP URL, CHEF-1031.
     end
@@ -71,9 +75,13 @@ when "rhel", "fedora"
       action :install
     end
 
+    # Grab from data1!!!!
+    # scp root@10.4.49.66:/var/chef-solo/cloudkick-agent-centos6-0.9.21-0.x86_64.rpm /var/chef-solo
     remote_file "#{Chef::Config[:file_cache_path]}/cloudkick-agent-centos6-#{agent_ver}.#{arch}.rpm" do
       not_if "rpm -qa | egrep -qx 'cloudkick-agent-#{agent_ver}.*'"
       source "http://packages.cloudkick.com/releases/cloudkick-agent/binaries/cloudkick-agent-centos6-#{agent_ver}.#{arch}.rpm"
+      # sha256sum /var/chef-solo/cloudkick-agent-centos6-0.9.21-0.x86_64.rpm 
+      checksum "2e9a9572c4cf3f39bf9627f042b404e609211920fb46f12cc7e4fedddce94e0b"
       notifies :install, "rpm_package[cloudkick-agent]", :immediately
       retries 5 # We may be redirected to a FTP URL, CHEF-1031.
     end
@@ -119,6 +127,8 @@ ruby_block "cloudkick data load" do
     require 'oauth'
     require 'cloudkick'
     begin
+      # This throws a "undefined method `map' for false:FalseClass"
+      # exception, but doesn't seem to harm the run.
       node.set['cloudkick']['data'] = Chef::CloudkickData.get(node)
     rescue Exception => e
       Chef::Log.warn("Unable to retrieve Cloudkick data for #{node.name}\n#{e}")
